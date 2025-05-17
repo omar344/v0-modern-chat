@@ -50,13 +50,13 @@ export function ChatInput() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form onSubmit={handleSubmit} className="relative w-full">
       <Textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type your message..."
-        className="min-h-[60px] pr-24 resize-none"
+        className="min-h-[60px] pr-24 resize-none w-full"
         disabled={isLoading}
       />
 

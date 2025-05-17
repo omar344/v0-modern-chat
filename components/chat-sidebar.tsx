@@ -47,11 +47,11 @@ export function ChatSidebar() {
       <div
         ref={sidebarRef}
         className={cn(
-          "h-full bg-muted/40 border-r transition-all duration-300 ease-in-out overflow-hidden z-50",
-          // Desktop: always visible, fixed width
-          "md:block md:w-64 md:relative",
+          "bg-muted/40 border-r transition-all duration-300 ease-in-out overflow-hidden z-50",
+          // Desktop: always visible, fixed width, full height
+          "md:w-64 md:relative md:block md:h-full md:shrink-0",
           // Mobile: fixed position, full height, toggleable
-          isMobile ? "fixed left-0 top-0 bottom-0 w-64" : "",
+          isMobile ? "fixed left-0 top-0 bottom-0 w-64 h-full" : "",
           // Mobile: translate when closed
           isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0",
         )}

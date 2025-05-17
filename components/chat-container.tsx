@@ -25,7 +25,7 @@ export function ChatContainer() {
   }, [messages])
 
   return (
-    <div className="flex flex-col h-full" onClick={handleContainerClick}>
+    <div className="flex flex-col flex-1 h-full overflow-hidden" onClick={handleContainerClick}>
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
@@ -51,8 +51,10 @@ export function ChatContainer() {
         </Alert>
       )}
 
-      <div className="p-4 border-t">
-        <ChatInput />
+      <div className="border-t shrink-0 w-full">
+        <div className="p-4 w-full">
+          <ChatInput />
+        </div>
       </div>
     </div>
   )

@@ -32,6 +32,7 @@ interface ChatState {
   initializeProject: () => Promise<void>
   sendMessage: (content: string) => Promise<void>
   uploadFile: (file: File) => Promise<void>
+  initializeSidebarState: () => void
 }
 
 // Determine if we're in a secure context (HTTPS)
@@ -53,7 +54,7 @@ export const useStore = create<ChatState>((set, get) => ({
   messages: [],
   projectId: null,
   isLoading: false,
-  isSidebarOpen: true,
+  isSidebarOpen: true, // Default to true, but will be initialized based on screen size
   isDarkMode: true,
   error: null,
 
@@ -96,6 +97,12 @@ export const useStore = create<ChatState>((set, get) => ({
   setError: (error) => set({ error }),
 
   clearMessages: () => set({ messages: [] }),
+
+  // Initialize sidebar state based on screen size
+  initializeSidebarState: () => {
+    const isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false
+    set({ isSidebarOpen: !isMobile }) // Open on desktop, closed on mobile
+  },
 
   initializeProject: async () => {
     try {

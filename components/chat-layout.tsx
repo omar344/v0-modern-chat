@@ -8,6 +8,7 @@ import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useEffect } from "react"
+import { cn } from "@/lib/utils"
 
 export function ChatLayout() {
   const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useStore()
@@ -21,11 +22,11 @@ export function ChatLayout() {
   }, [isMobile, isSidebarOpen, setSidebarOpen])
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-[100dvh] w-full overflow-hidden bg-background">
       <ChatSidebar />
 
-      <div className="flex flex-col flex-1 h-full overflow-hidden">
-        <header className="flex items-center justify-between p-4 border-b">
+      <div className={cn("flex flex-col flex-1 h-full overflow-hidden")}>
+        <header className="flex items-center justify-between p-4 border-b shrink-0">
           <div className="flex items-center">
             {isMobile && (
               <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-2 md:hidden">
