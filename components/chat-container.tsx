@@ -6,10 +6,18 @@ import { ChatMessage } from "./chat-message"
 import { ChatInput } from "./chat-input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export function ChatContainer() {
-  const { messages, error } = useStore()
+  const { messages, error, isSidebarOpen, setSidebarOpen } = useStore()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const isMobile = useIsMobile()
+
+  const handleContainerClick = () => {
+    if (isMobile && isSidebarOpen) {
+      setSidebarOpen(false)
+    }
+  }
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -17,7 +25,7 @@ export function ChatContainer() {
   }, [messages])
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" onClick={handleContainerClick}>
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">

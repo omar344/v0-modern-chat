@@ -25,6 +25,7 @@ interface ChatState {
   setProjectId: (id: string) => void
   setLoading: (loading: boolean) => void
   toggleSidebar: () => void
+  setSidebarOpen: (open: boolean) => void
   toggleTheme: () => void
   setError: (error: string | null) => void
   clearMessages: () => void
@@ -33,7 +34,20 @@ interface ChatState {
   uploadFile: (file: File) => Promise<void>
 }
 
-const API_BASE_URL = "http://192.168.1.177:5000/api/v1/rag"
+// Determine if we're in a secure context (HTTPS)
+const isSecureContext = typeof window !== "undefined" && window.location.protocol === "https:"
+
+// Adjust the API base URL based on the context
+const API_BASE_URL = isSecureContext
+  ? "https://192.168.1.177:5000/api/v1/rag" // Use HTTPS in secure contexts
+  : "http://192.168.1.177:5000/api/v1/rag" // Use HTTP otherwise
+
+// Add a warning message about mixed content if we're in a secure context
+if (isSecureContext && API_BASE_URL.startsWith("http:")) {
+  console.warn(
+    "Warning: Attempting to access an insecure API endpoint from a secure context. This may be blocked by the browser.",
+  )
+}
 
 export const useStore = create<ChatState>((set, get) => ({
   messages: [],
@@ -74,6 +88,8 @@ export const useStore = create<ChatState>((set, get) => ({
   setLoading: (loading) => set({ isLoading: loading }),
 
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+
+  setSidebarOpen: (open) => set({ isSidebarOpen: open }),
 
   toggleTheme: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
 
