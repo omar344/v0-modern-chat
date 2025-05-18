@@ -126,7 +126,7 @@ export const useStore = create<ChatState>((set, get) => ({
   },
 
   sendMessage: async (content) => {
-    const { projectId, addMessage } = get()
+    const { projectId, addMessage, updateLastMessage } = get()
 
     if (!projectId) {
       set({ error: "No active project" })
@@ -139,42 +139,25 @@ export const useStore = create<ChatState>((set, get) => ({
       // Add user message to the chat
       addMessage(content, "user")
 
-      // Add an empty assistant message that will be updated with streaming content
+      // Add an empty assistant message that will be updated
       addMessage("", "assistant")
 
-      // Create a new AbortController
-      const controller = new AbortController()
-      const signal = controller.signal
-
-      // Make the API request
       const response = await fetch(`${API_BASE_URL}/ask/${projectId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: content }),
-        signal,
+        body: JSON.stringify({ text: content, limit: 5 }),
       })
 
-      if (!response.body) {
-        throw new Error("Response body is null")
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.signal || "API Error")
       }
 
-      // Process the streaming response
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-
-      while (true) {
-        const { done, value } = await reader.read()
-
-        if (done) {
-          break
-        }
-
-        // Decode the chunk and update the last message
-        const chunk = decoder.decode(value, { stream: true })
-        get().updateLastMessage(chunk)
-      }
+      const data = await response.json()
+      // Only show the answer to the user
+      updateLastMessage(data.answer || "")
 
       set({ isLoading: false })
     } catch (error: any) {
@@ -186,44 +169,43 @@ export const useStore = create<ChatState>((set, get) => ({
   },
 
   uploadFile: async (file) => {
-    const { projectId } = get()
-
-    if (!projectId) {
-      set({ error: "No active project" })
-      return Promise.reject("No active project")
-    }
+    const { setProjectId, addMessage } = get();
 
     try {
-      set({ isLoading: true, error: null })
+      set({ isLoading: true, error: null });
 
-      const formData = new FormData()
-      formData.append("file", file)
+      const formData = new FormData();
+      formData.append("file", file);
 
-      const response = await axios.post(`${API_BASE_URL}/upload_file/${projectId}`, formData, {
+      // POST to the upload endpoint
+      const response = await axios.post(`${API_BASE_URL}/upload_file`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      })
+      });
 
-      set({
-        isLoading: false,
-      })
+      set({ isLoading: false });
 
-      // Add a system message indicating successful upload
-      get().addMessage(`File "${file.name}" uploaded successfully`, "system")
+      // Extract project_id from the response
+      const { project_id } = response.data;
+      if (project_id) {
+        setProjectId(project_id);
+        addMessage(`File "${file.name}" uploaded successfully. Project ID set.`, "system");
+      } else {
+        addMessage(`File "${file.name}" uploaded, but no project ID returned.`, "system");
+      }
 
-      return Promise.resolve()
+      return Promise.resolve();
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || "Failed to upload file"
+      const errorMessage = error.response?.data?.detail || "Failed to upload file";
       set({
         error: errorMessage,
         isLoading: false,
-      })
+      });
 
-      // Add a system message indicating failed upload
-      get().addMessage(`Failed to upload file: ${errorMessage}`, "system")
+      addMessage(`Failed to upload file: ${errorMessage}`, "system");
 
-      return Promise.reject(error)
+      return Promise.reject(error);
     }
   },
 }))
